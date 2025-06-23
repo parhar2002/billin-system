@@ -1,0 +1,302 @@
+﻿@model WebApplication1.Models.SalesHead
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+
+<h2 class="text-center my-4">Edit Sales Entry</h2>
+
+
+<div class="container">
+    <form asp-action="Create" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div class="form-group">
+            <label asp-for="SrNo" class="control-label"></label>
+            <input asp-for="SrNo" class="form-control" readonly />
+            <span asp-validation-for="SrNo" class="text-danger"></span>
+        </div>
+        <!-- Header Fields -->
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="Prefix" class="form-label"></label>
+                <select asp-for="Prefix" class="form-select" asp-items="Model.PrefixList"></select>
+                <span asp-validation-for="Prefix" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Seq" class="form-label"></label>
+                <input asp-for="Seq" class="form-control" type="number" min="0" />
+                <span asp-validation-for="Seq" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="CustomerName" class="form-label"></label>
+                <input asp-for="CustomerName" class="form-control" />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="MobileNo" class="form-label"></label>
+                <input asp-for="MobileNo" class="form-control" />
+                <span asp-validation-for="MobileNo" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="row g-3 mt-4">
+            <div class="col-md-12">
+                <h4>Items</h4>
+                <table class="table table-bordered" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Qty</th>
+                            <th>MRP</th>
+                            <th>Tax</th>
+                            <th>Disc%</th>
+                            <th>Sales Rate</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SalesChild != null)
+                        {
+                            for (int i = 0; i < Model.SalesChild.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <select asp-for="SalesChild[@i].ItemName" class="form-select item-select">
+                                            <option value="">-- Select Item --</option>
+                                            @foreach (var item in Model.ListItem)
+                                            {
+                                                <option value="@item.ItemName">@item.ItemName</option>
+                                            }
+                                        </select>
+                                        <input asp-for="SalesChild[@i].ItemSrno" type="hidden" class="item-srno-input" />
+                                    </td>
+                                    <td><input asp-for="SalesChild[@i].Qty" class="form-control qty-input" type="number" /></td>
+                                    <td><input asp-for="SalesChild[@i].MRP" class="form-control mrp-input" type="number" step="any" /></td>
+                                    <td><input asp-for="SalesChild[@i].Tax" class="form-control tax-input" type="number" step="any" /></td>
+                                    <td><input asp-for="SalesChild[@i].DiscPer" class="form-control disc-input" type="number" step="any" /></td>
+                                    <td><input asp-for="SalesChild[@i].SalesRate" class="form-control salesrate-input" type="number" step="any" /></td>
+                                    <td><input asp-for="SalesChild[@i].Total" class="form-control total-input" type="number" readonly /></td>
+                                    <td><button type="button" class="btn btn-danger remove-item-btn">Remove</button></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                <button type="button" id="addItemBtn" class="btn btn-success mt-2">Add Item</button>
+            </div>
+        </div>
+
+        <!-- Totals and Discounts -->
+        <div class="row g-3 mt-4 justify-content-center">
+            <div class="col-md-3">
+                <label asp-for="Total" class="form-label">Total</label>
+                <input asp-for="Total" class="form-control" id="Total" readonly />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="DiscPer" class="form-label">Discount %</label>
+                <div class="input-group">
+                    <input asp-for="DiscPer" class="form-control" id="DiscPer" type="number" step="any" />
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="DiscRs" class="form-label">Discount (Rs)</label>
+                <input asp-for="DiscRs" class="form-control" id="DiscRs"  />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="NetAmount" class="form-label">Net Amount</label>
+                <input asp-for="NetAmount" class="form-control" id="NetAmount" readonly />
+            </div>
+        </div>
+
+        <!-- Remarks -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <label asp-for="Remark" class="form-label"></label>
+                <input asp-for="Remark" class="form-control" />
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="row mt-4">
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Save</button>
+                <a asp-action="Index" class="btn btn-secondary w-100">Back</a>
+            </div>
+        </div>
+    </form>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+                const itemDataMap = {
+        @foreach (var item in Model.ListItem)
+        {
+            <text>
+                "@item.ItemName": {
+                    mrp: @item.Mrp,
+                    tax: @item.Tax,
+                    salesRate: @item.SalesRate,
+                    itemSrNo: @item.SrNo
+                },
+            </text>
+        }
+                };
+
+                function reindexSalesChildRows() {
+                    const rows = document.querySelectorAll("#itemsTable tbody tr");
+                    rows.forEach((row, index) => {
+                        row.querySelectorAll("input, select").forEach(input => {
+                            const name = input.getAttribute("name");
+                            if (name) {
+                                const newName = name.replace(/SalesChild\[\d+\]/, `SalesChild[${index}]`);
+                                input.setAttribute("name", newName);
+                            }
+                        });
+                    });
+                }
+
+                function calculateTotal(row) {
+                    const qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
+                    const rate = parseFloat(row.querySelector(".salesrate-input")?.value) || 0;
+                    const discPer = parseFloat(row.querySelector(".disc-input")?.value) || 0;
+
+                    const gross = qty * rate;
+                    const discount = (gross * discPer) / 100;
+                    const net = gross - discount;
+
+                    row.querySelector(".total-input").value = net.toFixed(2);
+                    updateGrandTotal();
+                }
+
+                function updateGrandTotal() {
+                    let total = 0;
+                    document.querySelectorAll(".total-input").forEach(input => {
+                        total += parseFloat(input.value) || 0;
+                    });
+
+                    document.getElementById("Total").value = total.toFixed(2);
+
+                    const discPer = parseFloat(document.getElementById("DiscPer")?.value) || 0;
+                    const discRs = (total * discPer) / 100;
+                    const netAmount = total - discRs;
+
+                    document.getElementById("DiscRs").value = discRs.toFixed(2);
+                    document.getElementById("NetAmount").value = netAmount.toFixed(2);
+                }
+
+                function handleItemChange(e) {
+                    const itemName = e.target.value;
+                    const row = e.target.closest("tr");
+                    const data = itemDataMap[itemName];
+
+                    if (data) {
+                        row.querySelector(".mrp-input").value = data.mrp;
+                        row.querySelector(".tax-input").value = data.tax;
+                        row.querySelector(".salesrate-input").value = data.salesRate;
+                        row.querySelector(".item-srno-input").value = data.itemSrNo || "";
+                    } else {
+                        row.querySelector(".mrp-input").value = "";
+                        row.querySelector(".tax-input").value = "";
+                        row.querySelector(".salesrate-input").value = "";
+                        row.querySelector(".item-srno-input").value = "";
+                    }
+
+                    calculateTotal(row);
+                }
+
+                function qtyOrRateChanged(e) {
+                    const row = e.target.closest("tr");
+                    calculateTotal(row);
+                }
+
+                function attachAutoFillHandlers() {
+                    document.querySelectorAll(".item-select").forEach(select => {
+                        select.removeEventListener("change", handleItemChange);
+                        select.addEventListener("change", handleItemChange);
+                    });
+
+                    document.querySelectorAll(".qty-input, .salesrate-input, .disc-input").forEach(input => {
+                        input.removeEventListener("input", qtyOrRateChanged);
+                        input.addEventListener("input", qtyOrRateChanged);
+                    });
+                }
+
+                document.getElementById("addItemBtn").addEventListener("click", () => {
+                    const tbody = document.querySelector("#itemsTable tbody");
+                    const rowCount = tbody.rows.length;
+
+                    const newRow = document.createElement("tr");
+                    newRow.innerHTML = `
+                        <td>
+                            <select name="SalesChild[${rowCount}].ItemName" class="form-select item-select">
+                                <option value="">-- Select Item --</option>
+        @foreach (var item in Model.ListItem)
+        {
+                                            <option value="@item.ItemName">@item.ItemName</option>
+        }
+                            </select>
+                            <input name="SalesChild[${rowCount}].ItemSrNo" type="hidden" class="item-srno-input" />
+                        </td>
+                        <td><input name="SalesChild[${rowCount}].Qty" class="form-control qty-input" type="number" /></td>
+                        <td><input name="SalesChild[${rowCount}].MRP" class="form-control mrp-input" type="number" step="any" /></td>
+                        <td><input name="SalesChild[${rowCount}].Tax" class="form-control tax-input" type="number" step="any" /></td>
+                        <td><input name="SalesChild[${rowCount}].DiscPer" class="form-control disc-input" type="number" step="any" /></td>
+                        <td><input name="SalesChild[${rowCount}].SalesRate" class="form-control salesrate-input" type="number" step="any" /></td>
+                        <td><input name="SalesChild[${rowCount}].Total" class="form-control total-input" type="number" readonly /></td>
+                       <input name="SalesChild[${rowCount}].ActionJson" value="i" type="hidden" />
+                        <td><button type="button" class="btn btn-danger remove-item-btn">Remove</button></td>
+                    `;
+                    tbody.appendChild(newRow);
+                    reindexSalesChildRows();
+                    attachAutoFillHandlers();
+                });
+
+                document.querySelector("#itemsTable tbody").addEventListener("click", e => {
+                    if (e.target.classList.contains("remove-item-btn")) {
+                        e.target.closest("tr").remove();
+                        reindexSalesChildRows();
+                        updateGrandTotal();
+                    }
+                });
+
+                document.getElementById("DiscPer")?.addEventListener("input", updateGrandTotal);
+
+                // Init
+                attachAutoFillHandlers();
+                updateGrandTotal();
+    </script>
+}
+
+<style>
+    html, body {
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+        background-color: #f8f9fa;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .form-control:disabled {
+        background-color: #e9ecef;
+        font-style: italic;
+    }
+
+    .btn {
+        min-width: 100px;
+    }
+
+    .container {
+        padding-bottom: 40px;
+    }
+</style>

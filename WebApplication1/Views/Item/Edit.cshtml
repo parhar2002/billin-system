@@ -1,0 +1,74 @@
+﻿@model WebApplication1.Models.Item
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1 class="mt-4 mb-4">Edit Item</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <div class="form-group">
+                <label asp-for="SrNo" class="control-label"></label>
+                <input asp-for="SrNo" class="form-control" readonly />
+                <span asp-validation-for="SrNo" class="text-danger"></span>
+            </div>
+            <div class="form-row row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="ItemName" class="form-label fw-bold"></label>
+                    <input asp-for="ItemName" class="form-control" placeholder="Enter item name" />
+                    <span asp-validation-for="ItemName" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CompanySrNo" class="form-label fw-bold">Company</label>
+                    <select asp-for="CompanySrNo"
+                            class="form-select"
+                            asp-items="@(new SelectList(Model.Companies, "SrNo", "CompanyName", Model.CompanySrNo))">
+                        <option value="">-- Select Company --</option>
+                    </select>
+                    <span asp-validation-for="CompanySrNo" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-row row mb-3">
+
+                <div class="col-md-4">
+                    <label asp-for="Mrp" class="form-label fw-bold"></label>
+                    <input asp-for="Mrp" class="form-control" placeholder="Enter MRP" />
+                    <span asp-validation-for="Mrp" class="text-danger"></span>
+                </div>
+
+
+                <div class="col-md-4">
+                    <label asp-for="Tax" class="form-label fw-bold"></label>
+                    <input asp-for="Tax" class="form-control" placeholder="Enter tax %" />
+                    <span asp-validation-for="Tax" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="SalesRate" class="form-label fw-bold"></label>
+                    <input asp-for="SalesRate" class="form-control" placeholder="Enter sales rate" />
+                    <span asp-validation-for="SalesRate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <input type="submit" value="Save" class="btn btn-primary px-4" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Back link -->
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
+
+<!-- Validation Scripts -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
