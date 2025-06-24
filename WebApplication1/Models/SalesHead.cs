@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApplication1.Models
 {
@@ -7,19 +8,12 @@ namespace WebApplication1.Models
         public SalesHead()
         {
             SalesChild = new List<SalesChild>();
-            PrefixList = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "Mr", Text = "Mr" },
-                new SelectListItem { Value = "Mrs", Text = "Mrs" },
-                new SelectListItem { Value = "Ms", Text = "Ms" },
-                new SelectListItem { Value = "Dr", Text = "Dr" }
-            };
-
+           
         }
 
         public int? SrNo { get; set; }
         public string Prefix { get; set; }
-        public List<SelectListItem>? PrefixList { get; set; }
+        [Display(Name = "Sequence Number")]
         public int Seq { get; set; }
         public string CustomerName { get; set; }
         

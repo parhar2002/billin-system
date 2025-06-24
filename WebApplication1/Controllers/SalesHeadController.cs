@@ -15,59 +15,67 @@ namespace WebApplication1.Controllers
 
         public IActionResult Index()
         {
-            var SalesHeads = _repository.GetSalesHeadList();
-            return View(SalesHeads);
+            var salesHeads = _repository.GetSalesHeadList();
+            return View(salesHeads);
         }
+
         public IActionResult Create()
         {
             var model = new SalesHead
             {
+                Prefix = GeneratePrefix(),
+                Seq = GetNextSequenceNumber(),
                 ListItem = _repository.GetItemList()
             };
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult Create(SalesHead SalesHead)
+        public IActionResult Create(SalesHead salesHead)
         {
             if (ModelState.IsValid)
             {
-                _repository.SaveSalesHead(SalesHead); 
+                _repository.SaveSalesHead(salesHead);
                 return RedirectToAction("Index");
             }
-            return View(SalesHead);
+
+            // Re-populate ListItem on failure
+            salesHead.ListItem = _repository.GetItemList();
+            return View(salesHead);
         }
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var SalesHead = _repository.GetSalesHeadById(id);
-            if (SalesHead == null)
+            var salesHead = _repository.GetSalesHeadById(id);
+            if (salesHead == null)
                 return NotFound();
 
-            SalesHead.ListItem = _repository.GetItemList();
-
-            return View(SalesHead);
+            salesHead.ListItem = _repository.GetItemList();
+            return View(salesHead);
         }
 
         [HttpPost]
-        public IActionResult Edit(SalesHead SalesHead)
+        public IActionResult Edit(SalesHead salesHead)
         {
             if (ModelState.IsValid)
             {
-                _repository.SaveSalesHead(SalesHead); 
+                _repository.SaveSalesHead(salesHead);
                 return RedirectToAction("Index");
             }
-            return View(SalesHead);
+
+            salesHead.ListItem = _repository.GetItemList();
+            return View(salesHead);
         }
 
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            var SalesHead = _repository.GetSalesHeadById(id);
-            if (SalesHead == null)
+            var salesHead = _repository.GetSalesHeadById(id);
+            if (salesHead == null)
                 return NotFound();
 
-            return View(SalesHead); 
+            return View(salesHead);
         }
 
         [HttpPost, ActionName("Delete")]
@@ -77,8 +85,14 @@ namespace WebApplication1.Controllers
             return RedirectToAction("Index");
         }
 
+        private string GeneratePrefix()
+        {
+            return "INV" + DateTime.Now.ToString("yyyy");
+        }
 
+        private int GetNextSequenceNumber()
+        {
+            return _repository.GetMaxSequenceNumber() + 1;
+        }
     }
-
 }
-

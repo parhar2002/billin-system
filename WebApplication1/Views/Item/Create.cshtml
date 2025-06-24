@@ -14,7 +14,7 @@
             <div class="form-row row mb-3">
                 <div class="col-md-6">
                     <label asp-for="ItemName" class="form-label fw-bold"></label>
-                    <input asp-for="ItemName" class="form-control" placeholder="Enter Item name" />
+                    <input asp-for="ItemName" class="form-control" placeholder="Enter Item name" autofocus />
                     <span asp-validation-for="ItemName" class="text-danger"></span>
                 </div>
 
@@ -32,18 +32,18 @@
             <div class="form-row row mb-3">
                 <div class="col-md-4">
                     <label asp-for="Mrp" class="form-label fw-bold"></label>
-                    <input asp-for="Mrp" class="form-control" placeholder="Enter MRP" />
+                    <input asp-for="Mrp" class="form-control" placeholder="Enter MRP" value="0" />
                     <span asp-validation-for="Mrp" class="text-danger"></span>
                 </div>
                 <div class="col-md-4">
                     <label asp-for="Tax" class="form-label fw-bold"></label>
-                    <input asp-for="Tax" class="form-control" placeholder="Enter Tax %" />
+                    <input asp-for="Tax" class="form-control" placeholder="Enter Tax %" value="0" />
                     <span asp-validation-for="Tax" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-4">
                     <label asp-for="SalesRate" class="form-label fw-bold"></label>
-                    <input asp-for="SalesRate" class="form-control" placeholder="Enter sales rate" />
+                    <input asp-for="SalesRate" class="form-control" placeholder="Enter sales rate" value="0" />
                     <span asp-validation-for="SalesRate" class="text-danger"></span>
                 </div>
             </div>

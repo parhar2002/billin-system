@@ -14,17 +14,17 @@
         <div class="row g-3">
             <div class="col-md-3">
                 <label asp-for="Prefix" class="form-label"></label>
-                <select asp-for="Prefix" class="form-select" asp-items="Model.PrefixList"></select>
+                <input asp-for="Prefix" class="form-control" id="Prefix" readonly />
                 <span asp-validation-for="Prefix" class="text-danger"></span>
             </div>
             <div class="col-md-3">
                 <label asp-for="Seq" class="form-label"></label>
-                <input asp-for="Seq" class="form-control" type="number" min="0" />
+                <input asp-for="Seq" class="form-control" type="number" readonly />
                 <span asp-validation-for="Seq" class="text-danger"></span>
             </div>
             <div class="col-md-3">
                 <label asp-for="CustomerName" class="form-label"></label>
-                <input asp-for="CustomerName" class="form-control" />
+                <input asp-for="CustomerName" class="form-control" autofocus />
                 <span asp-validation-for="CustomerName" class="text-danger"></span>
             </div>
             <div class="col-md-3">
@@ -52,7 +52,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model.SalesChild != null)
+                        @if (Model.SalesChild != null && Model.SalesChild.Count > 0)
                         {
                             for (int i = 0; i < Model.SalesChild.Count; i++)
                             {
@@ -68,14 +68,36 @@
                                         <input asp-for="SalesChild[@i].ItemSrno" type="hidden" class="item-srno-input" />
                                     </td>
                                     <td><input asp-for="SalesChild[@i].Qty" class="form-control qty-input" type="number" /></td>
-                                    <td><input asp-for="SalesChild[@i].MRP" class="form-control mrp-input" type="number" step="any" /></td>
-                                    <td><input asp-for="SalesChild[@i].Tax" class="form-control tax-input" type="number" step="any" /></td>
+                                    <td><input asp-for="SalesChild[@i].MRP" class="form-control mrp-input" type="number" step="any" readonly /></td>
+                                    <td><input asp-for="SalesChild[@i].Tax" class="form-control tax-input" type="number" step="any" readonly /></td>
                                     <td><input asp-for="SalesChild[@i].DiscPer" class="form-control disc-input" type="number" step="any" /></td>
-                                    <td><input asp-for="SalesChild[@i].SalesRate" class="form-control salesrate-input" type="number" step="any" /></td>
+                                    <td><input asp-for="SalesChild[@i].SalesRate" class="form-control salesrate-input" type="number" step="any" readonly /></td>
                                     <td><input asp-for="SalesChild[@i].Total" class="form-control total-input" type="number" readonly /></td>
                                     <td><button type="button" class="btn btn-danger remove-item-btn">Remove</button></td>
                                 </tr>
                             }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    <select name="SalesChild[0].ItemName" class="form-select item-select">
+                                        <option value="">-- Select Item --</option>
+                                        @foreach (var item in Model.ListItem)
+                                        {
+                                            <option value="@item.ItemName">@item.ItemName</option>
+                                        }
+                                    </select>
+                                    <input name="SalesChild[0].ItemSrno" type="hidden" class="item-srno-input" />
+                                </td>
+                                <td><input name="SalesChild[0].Qty" class="form-control qty-input" type="number" value="0" /></td>
+                                <td><input name="SalesChild[0].MRP" class="form-control mrp-input" type="number" step="any" /></td>
+                                <td><input name="SalesChild[0].Tax" class="form-control tax-input" type="number" step="any" /></td>
+                                <td><input name="SalesChild[0].DiscPer" class="form-control disc-input" type="number" step="any" value="0" /></td>
+                                <td><input name="SalesChild[0].SalesRate" class="form-control salesrate-input" type="number" step="any" /></td>
+                                <td><input name="SalesChild[0].Total" class="form-control total-input" type="number" readonly /></td>
+                                <td><button type="button" class="btn btn-danger remove-item-btn">Remove</button></td>
+                            </tr>
                         }
                     </tbody>
                 </table>
@@ -98,7 +120,7 @@
             </div>
             <div class="col-md-3">
                 <label asp-for="DiscRs" class="form-label">Discount (Rs)</label>
-                <input asp-for="DiscRs" class="form-control" id="DiscRs"  />
+                <input asp-for="DiscRs" class="form-control" id="DiscRs" />
             </div>
             <div class="col-md-3">
                 <label asp-for="NetAmount" class="form-label">Net Amount</label>
@@ -128,141 +150,160 @@
     @await Html.PartialAsync("_ValidationScriptsPartial")
 
     <script>
-                const itemDataMap = {
+        const itemDataMap = {
         @foreach (var item in Model.ListItem)
         {
             <text>
-            "@item.ItemName": {
-                mrp: @item.Mrp,
-                tax: @item.Tax,
-                salesRate: @item.SalesRate,
-                itemSrNo: @item.SrNo
-            },
+                    "@item.ItemName": {
+                        mrp: @item.Mrp.ToString("0.00"),
+                        tax: @item.Tax.ToString("0.00"),
+                        salesRate: @item.SalesRate.ToString("0.00"),
+                        itemSrNo: @item.SrNo
+                    },
             </text>
         }
-                };
+        };
 
-                function reindexSalesChildRows() {
-                    const rows = document.querySelectorAll("#itemsTable tbody tr");
-                    rows.forEach((row, index) => {
-                        row.querySelectorAll("input, select").forEach(input => {
-                            const name = input.getAttribute("name");
-                            if (name) {
-                                const newName = name.replace(/SalesChild\[\d+\]/, `SalesChild[${index}]`);
-                                input.setAttribute("name", newName);
-                            }
-                        });
-                    });
-                }
-
-                function calculateTotal(row) {
-                    const qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
-                    const rate = parseFloat(row.querySelector(".salesrate-input")?.value) || 0;
-                    const discPer = parseFloat(row.querySelector(".disc-input")?.value) || 0;
-
-                    const gross = qty * rate;
-                    const discount = (gross * discPer) / 100;
-                    const net = gross - discount;
-
-                    row.querySelector(".total-input").value = net.toFixed(2);
-                    updateGrandTotal();
-                }
-
-                function updateGrandTotal() {
-                    let total = 0;
-                    document.querySelectorAll(".total-input").forEach(input => {
-                        total += parseFloat(input.value) || 0;
-                    });
-
-                    document.getElementById("Total").value = total.toFixed(2);
-
-                    const discPer = parseFloat(document.getElementById("DiscPer")?.value) || 0;
-                    const discRs = (total * discPer) / 100;
-                    const netAmount = total - discRs;
-
-                    document.getElementById("DiscRs").value = discRs.toFixed(2);
-                    document.getElementById("NetAmount").value = netAmount.toFixed(2);
-                }
-
-                function handleItemChange(e) {
-                    const itemName = e.target.value;
-                    const row = e.target.closest("tr");
-                    const data = itemDataMap[itemName];
-
-                    if (data) {
-                        row.querySelector(".mrp-input").value = data.mrp;
-                        row.querySelector(".tax-input").value = data.tax;
-                        row.querySelector(".salesrate-input").value = data.salesRate;
-                        row.querySelector(".item-srno-input").value = data.itemSrNo || "";
-                    } else {
-                        row.querySelector(".mrp-input").value = "";
-                        row.querySelector(".tax-input").value = "";
-                        row.querySelector(".salesrate-input").value = "";
-                        row.querySelector(".item-srno-input").value = "";
+        function reindexSalesChildRows() {
+            const rows = document.querySelectorAll("#itemsTable tbody tr");
+            rows.forEach((row, index) => {
+                row.querySelectorAll("input, select").forEach(input => {
+                    const name = input.getAttribute("name");
+                    if (name) {
+                        const newName = name.replace(/SalesChild\[\d+\]/, `SalesChild[${index}]`);
+                        input.setAttribute("name", newName);
                     }
+                });
+            });
+        }
 
-                    calculateTotal(row);
-                }
+        function calculateTotal(row) {
+            const qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
+            const rate = parseFloat(row.querySelector(".salesrate-input")?.value) || 0;
+            const discPer = parseFloat(row.querySelector(".disc-input")?.value) || 0;
 
-                function qtyOrRateChanged(e) {
-                    const row = e.target.closest("tr");
-                    calculateTotal(row);
-                }
+            const gross = qty * rate;
+            const discount = (gross * discPer) / 100;
+            const net = gross - discount;
 
-                function attachAutoFillHandlers() {
-                    document.querySelectorAll(".item-select").forEach(select => {
-                        select.removeEventListener("change", handleItemChange);
-                        select.addEventListener("change", handleItemChange);
-                    });
+            row.querySelector(".total-input").value = net.toFixed(2);
+            updateGrandTotal();
+        }
 
-                    document.querySelectorAll(".qty-input, .salesrate-input, .disc-input").forEach(input => {
-                        input.removeEventListener("input", qtyOrRateChanged);
-                        input.addEventListener("input", qtyOrRateChanged);
-                    });
-                }
+        function updateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll(".total-input").forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
 
-                document.getElementById("addItemBtn").addEventListener("click", () => {
-                    const tbody = document.querySelector("#itemsTable tbody");
-                    const rowCount = tbody.rows.length;
+            document.getElementById("Total").value = total.toFixed(2);
 
-                    const newRow = document.createElement("tr");
-                    newRow.innerHTML = `
-                        <td>
-                            <select name="SalesChild[${rowCount}].ItemName" class="form-select item-select">
-                                <option value="">-- Select Item --</option>
+            const discPer = parseFloat(document.getElementById("DiscPer")?.value) || 0;
+            const discRs = (total * discPer) / 100;
+            const netAmount = total - discRs;
+
+            document.getElementById("DiscRs").value = discRs.toFixed(2);
+            document.getElementById("NetAmount").value = netAmount.toFixed(2);
+        }
+
+        function handleItemChange(e) {
+            const itemName = e.target.value;
+            const row = e.target.closest("tr");
+            const data = itemDataMap[itemName];
+
+            if (data) {
+                const mrp = parseFloat(data.mrp) || 0;
+                const tax = parseFloat(data.tax) || 0;
+                const salesRate = mrp + (mrp * tax / 100);
+
+                row.querySelector(".mrp-input").value = mrp.toFixed(2);
+                row.querySelector(".tax-input").value = tax.toFixed(2);
+                row.querySelector(".salesrate-input").value = salesRate.toFixed(2);
+                row.querySelector(".item-srno-input").value = data.itemSrNo || "";
+            } else {
+                row.querySelector(".mrp-input").value = "";
+                row.querySelector(".tax-input").value = "";
+                row.querySelector(".salesrate-input").value = "";
+                row.querySelector(".item-srno-input").value = "";
+            }
+
+            calculateTotal(row);
+        }
+
+        function qtyOrRateChanged(e) {
+            const row = e.target.closest("tr");
+            calculateTotal(row);
+        }
+
+        function attachAutoFillHandlers() {
+            document.querySelectorAll(".item-select").forEach(select => {
+                select.removeEventListener("change", handleItemChange);
+                select.addEventListener("change", handleItemChange);
+            });
+
+            document.querySelectorAll(".qty-input, .disc-input").forEach(input => {
+                input.removeEventListener("input", qtyOrRateChanged);
+                input.addEventListener("input", qtyOrRateChanged);
+            });
+        }
+
+        document.getElementById("addItemBtn").addEventListener("click", () => {
+            const tbody = document.querySelector("#itemsTable tbody");
+            const rowCount = tbody.rows.length;
+
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td>
+                    <select name="SalesChild[${rowCount}].ItemName" class="form-select item-select">
+                        <option value="">-- Select Item --</option>
         @foreach (var item in Model.ListItem)
         {
-                                        <option value="@item.ItemName">@item.ItemName</option>
+            <text><option value="@item.ItemName">@item.ItemName</option></text>
         }
-                            </select>
-                            <input name="SalesChild[${rowCount}].ItemSrNo" type="hidden" class="item-srno-input" />
-                        </td>
-                        <td><input name="SalesChild[${rowCount}].Qty" class="form-control qty-input" type="number" /></td>
-                        <td><input name="SalesChild[${rowCount}].MRP" class="form-control mrp-input" type="number" step="any" /></td>
-                        <td><input name="SalesChild[${rowCount}].Tax" class="form-control tax-input" type="number" step="any" /></td>
-                        <td><input name="SalesChild[${rowCount}].DiscPer" class="form-control disc-input" type="number" step="any" /></td>
-                        <td><input name="SalesChild[${rowCount}].SalesRate" class="form-control salesrate-input" type="number" step="any" /></td>
-                        <td><input name="SalesChild[${rowCount}].Total" class="form-control total-input" type="number" readonly /></td>
-                        <td><button type="button" class="btn btn-danger remove-item-btn">Remove</button></td>
-                    `;
-                    tbody.appendChild(newRow);
-                    reindexSalesChildRows();
-                    attachAutoFillHandlers();
-                });
+                    </select>
+                    <input name="SalesChild[${rowCount}].ItemSrno" type="hidden" class="item-srno-input" />
+                </td>
+                <td><input name="SalesChild[${rowCount}].Qty" class="form-control qty-input" type="number" value="0" /></td>
+                <td><input name="SalesChild[${rowCount}].MRP" class="form-control mrp-input" type="number" step="any" readonly /></td>
+                <td><input name="SalesChild[${rowCount}].Tax" class="form-control tax-input" type="number" step="any" readonly /></td>
+                <td><input name="SalesChild[${rowCount}].DiscPer" class="form-control disc-input" type="number" step="any" value="0" /></td>
+                <td><input name="SalesChild[${rowCount}].SalesRate" class="form-control salesrate-input" type="number" step="any" readonly /></td>
+                <td><input name="SalesChild[${rowCount}].Total" class="form-control total-input" type="number" readonly /></td>
+                <td><button type="button" class="btn btn-danger remove-item-btn">Remove</button></td>
+            `;
+            tbody.appendChild(newRow);
+            reindexSalesChildRows();
+            attachAutoFillHandlers();
+        });
 
-                document.querySelector("#itemsTable tbody").addEventListener("click", e => {
-                    if (e.target.classList.contains("remove-item-btn")) {
-                        e.target.closest("tr").remove();
-                        reindexSalesChildRows();
-                        updateGrandTotal();
-                    }
-                });
-
-                document.getElementById("DiscPer")?.addEventListener("input", updateGrandTotal);
-
-                // Init
-                attachAutoFillHandlers();
+        document.querySelector("#itemsTable tbody").addEventListener("click", e => {
+            if (e.target.classList.contains("remove-item-btn")) {
+                e.target.closest("tr").remove();
+                reindexSalesChildRows();
                 updateGrandTotal();
+            }
+        });
+
+        document.getElementById("DiscPer")?.addEventListener("input", updateGrandTotal);
+
+        document.getElementById("DiscRs")?.addEventListener("input", () => {
+            const total = parseFloat(document.getElementById("Total").value) || 0;
+            const discRs = parseFloat(document.getElementById("DiscRs").value) || 0;
+
+            if (total > 0) {
+                const discPer = (discRs / total) * 100;
+                document.getElementById("DiscPer").value = discPer.toFixed(2);
+
+                const netAmount = total - discRs;
+                document.getElementById("NetAmount").value = netAmount.toFixed(2);
+            } else {
+                document.getElementById("DiscPer").value = "0.00";
+                document.getElementById("NetAmount").value = total.toFixed(2);
+            }
+        });
+
+        attachAutoFillHandlers();
+        updateGrandTotal();
     </script>
 }
 

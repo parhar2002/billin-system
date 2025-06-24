@@ -11,14 +11,13 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             <div class="form-group">
-                <label asp-for="SrNo" class="control-label"></label>
-                <input asp-for="SrNo" class="form-control" readonly />
+                <input asp-for="SrNo" class="form-control" readonly type="hidden" />
                 <span asp-validation-for="SrNo" class="text-danger"></span>
             </div>
             <div class="form-row row mb-3">
                 <div class="col-md-6">
                     <label asp-for="ItemName" class="form-label fw-bold"></label>
-                    <input asp-for="ItemName" class="form-control" placeholder="Enter item name" />
+                    <input asp-for="ItemName" class="form-control" placeholder="Enter item name" autofocus />
                     <span asp-validation-for="ItemName" class="text-danger"></span>
                 </div>
 

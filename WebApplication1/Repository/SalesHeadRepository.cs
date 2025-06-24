@@ -96,7 +96,9 @@ namespace WebApplication1.Repository
                                 Tax = rdr["tax"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["tax"]),
                                 DiscPer = rdr["disc_per"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["disc_per"]),
                                 SalesRate = rdr["sales_rate"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["sales_rate"]),
-                                Total = 0 // will calculate below
+                                ActionJson = "U",
+
+                                Total = 0 
                             };
 
                             // Calculate total safely
@@ -107,6 +109,7 @@ namespace WebApplication1.Repository
                             decimal total = qty * salesRate;
                             total -= total * discPer / 100;
                             child.Total = total;
+                           
 
                             salesHead.SalesChild.Add(child);
                         }
@@ -191,6 +194,11 @@ namespace WebApplication1.Repository
             return itemList;
         }
 
+        public int GetMaxSequenceNumber()
+        {
+            var list = GetSalesHeadList();
+            return list.Any() ? list.Max(x => x.Seq) : 0;
+        }
 
     }
 }
